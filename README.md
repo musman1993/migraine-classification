@@ -1,6 +1,6 @@
 # 🧠 Migraine Classification using Machine Learning
 
-![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
+![Python](https://img.shields.io/badge/Python-3.14+-blue.svg)
 ![Framework](https://img.shields.io/badge/ML-Scikit--Learn-orange.svg)
 ![Deep Learning](https://img.shields.io/badge/DeepLearning-TabNet-red.svg)
 ![Explainability](https://img.shields.io/badge/Explainability-SHAP-green.svg)
@@ -135,7 +135,7 @@ SHAP is used to explain **how each feature contributes to predictions**.
 ## 🚀 How to Run
 
 ```bash
-git clone https://github.com/your-username/migraine-classification.git
+git clone https://github.com/musman1993//migraine-classification.git
 cd migraine-classification
 pip install -r requirements.txt
 python train.py
