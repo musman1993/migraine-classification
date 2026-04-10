@@ -1,0 +1,106 @@
+Lab - Week 7: Interpreting Machine Learning Models Using SHAP (Migraine Dataset)
+
+Objective
+Train a Random Forest classifier on the given migraine dataset.
+Use SHAP (SHapley Additive exPlanations) to identify which features most influence the migraine type classification.
+Interpret feature importance. 
+This lab focuses on identifying which migraine-related features (like Visual, Vertigo, Intensity, Age, etc.) contribute most to predicting migraine types.
+
+Step 1 – Import Required Libraries
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import LabelEncoder
+import shap
+import matplotlib.pyplot as plt
+
+
+Step 2 – Load and Prepare the Dataset
+# Load the dataset
+df = pd.read_excel("migraine dataset.xlsx")
+
+# Preview the data
+print("Dataset Preview:")
+print(df.head())
+
+# Check columns
+print("\nColumns:", df.columns.tolist())
+
+# Encode the target column ('Type')
+le = LabelEncoder()
+y = le.fit_transform(df["Type"].astype(str))
+
+# Define features
+X = df.drop(columns=["Type"])
+
+# Ensure all features are numeric
+X = X.apply(pd.to_numeric, errors="coerce").fillna(0)
+
+
+Step 3 – Split Data into Train and Test Sets
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+print("Training set size:", X_train.shape)
+print("Test set size:", X_test.shape)
+
+
+Step 4 – Train Random Forest Model
+rf = RandomForestClassifier(n_estimators=200, random_state=42)
+rf.fit(X_train, y_train)
+
+print("Model trained successfully!")
+
+
+Step 5 – Apply SHAP for Model Interpretability
+# Initialize SHAP explainer
+explainer = shap.TreeExplainer(rf)
+
+# Compute SHAP values for the test set
+shap_values = explainer(X_test)
+
+
+Step 6 – Visualize Feature Importance
+# For multi-class models, average SHAP values across classes
+if shap_values.values.ndim == 3:
+    shap_values_2d = np.mean(np.abs(shap_values.values), axis=2)
+else:
+    shap_values_2d = shap_values.values
+
+# Plot global feature importance
+print("Top features influencing migraine predictions:")
+shap.summary_plot(shap_values_2d, X_test, feature_names=X_test.columns)
+
+
+Step 7 – Numerical Feature Ranking
+# Get mean absolute SHAP value for each feature
+importance = np.mean(np.abs(shap_values_2d), axis=0)
+feature_importance = pd.DataFrame({
+    "Feature": X_test.columns,
+    "Importance": importance
+})
+feature_importance.sort_values(by="Importance", ascending=False, inplace=True)
+
+print("\nFeature importance ranking:")
+print(feature_importance)
+
+
+Step 8 – Individual Prediction Explanation (Optional)
+# Pick one sample (first row)
+sample_index = 0
+pred_class = rf.predict(X_test.iloc[[sample_index]])[0]
+
+# Visualize how each feature contributed to this prediction
+if shap_values.values.ndim == 3:
+    shap.plots.waterfall(shap_values[sample_index, :, pred_class])
+else:
+    shap.plots.waterfall(shap_values[sample_index])
+
+
+Questions to answer: 
+1) Which features have the highest impact on predicting migraine type?
+2) How does the colour help interpret feature influence?
+3) Are the top-ranked features clinically relevant indicators of migraine?
+4) How might removing low-impact features simplify the model without losing accuracy?
